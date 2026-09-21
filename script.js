@@ -30,7 +30,7 @@ function keystrokesOf(char) {
   return strokes;
 }
 
-// 두 문자열 간 편집 거리(삽입/삭제/치환 최소 횟수) 계산
+// ---------- 최종 결과물의 문자열 일치율 계산 ----------
 function levenshteinDistance(a, b) {
   const m = a.length, n = b.length;
   if (m === 0) return n;
@@ -44,18 +44,13 @@ function levenshteinDistance(a, b) {
     curr[0] = i;
     for (let j = 1; j <= n; j++) {
       const cost = a[i - 1] === b[j - 1] ? 0 : 1;
-      curr[j] = Math.min(
-        prev[j] + 1,       // 삭제
-        curr[j - 1] + 1,   // 삽입
-        prev[j - 1] + cost // 치환(또는 일치)
-      );
+      curr[j] = Math.min(prev[j] + 1, curr[j - 1] + 1, prev[j - 1] + cost);
     }
     [prev, curr] = [curr, prev];
   }
   return prev[n];
 }
 
-// 최종 입력 텍스트가 목표 텍스트와 얼마나 일치하는지(%)
 function calcMatchRate(target, typed) {
   if (target.length === 0) return 100;
   const distance = levenshteinDistance(target, typed);
@@ -65,22 +60,30 @@ function calcMatchRate(target, typed) {
 }
 
 // ---------- 상태 ----------
+let userName = '';
+let userPosition = '';
 let targetText = '';
 let startTime = null;
 let timerInterval = null;
 let finished = false;
 let correctStrokes = 0;
 let wrongStrokes = 0;
-let finalizedIndex = -1;    // 여기까지는 조합이 끝나 '확정'된 글자
+let finalizedIndex = -1;
 let prevValue = '';
-let composingFlag = false;  // compositionstart ~ compositionend 사이 true
+let composingFlag = false;
 
 // ---------- DOM ----------
 const screens = {
+  welcome: document.getElementById('screen-welcome'),
   intro: document.getElementById('screen-intro'),
   game: document.getElementById('screen-game'),
   result: document.getElementById('screen-result')
 };
+const welcomeNextBtn = document.getElementById('welcomeNextBtn');
+const userNameInput = document.getElementById('userNameInput');
+const userPositionInput = document.getElementById('userPositionInput');
+const greetingText = document.getElementById('greetingText');
+
 const presetButtons = Array.from(document.querySelectorAll('.preset-btn'));
 const customText = document.getElementById('customText');
 const startBtn = document.getElementById('startBtn');
@@ -94,8 +97,8 @@ const quitBtn = document.getElementById('quitBtn');
 const resultTime = document.getElementById('resultTime');
 const resultCpm = document.getElementById('resultCpm');
 const resultAcc = document.getElementById('resultAcc');
+const resultMatch = document.getElementById('resultMatch');
 const resultMistakes = document.getElementById('resultMistakes');
-const resultMatch = document.getElementById('resultMatch'); // 추가
 const retryBtn = document.getElementById('retryBtn');
 const homeBtn = document.getElementById('homeBtn');
 
@@ -104,7 +107,21 @@ function showScreen(name) {
   screens[name].classList.add('active');
 }
 
-// ---------- 프리셋 선택 ----------
+// ---------- 1) 이름/직급 입력 ----------
+welcomeNextBtn.addEventListener('click', () => {
+  const name = userNameInput.value.trim();
+  const position = userPositionInput.value.trim();
+  if (!name || !position) {
+    alert('이름과 직급을 모두 입력해주세요.');
+    return;
+  }
+  userName = name;
+  userPosition = position;
+  greetingText.textContent = `${userName} ${userPosition}님, 반갑습니다!`;
+  showScreen('intro');
+});
+
+// ---------- 2) 프리셋 선택 ----------
 presetButtons.forEach(btn => {
   btn.addEventListener('click', () => {
     presetButtons.forEach(b => b.classList.remove('active'));
@@ -121,9 +138,9 @@ presetButtons.forEach(btn => {
   });
 });
 
-// ---------- 게임 시작 ----------
 startBtn.addEventListener('click', () => startGame(customText.value));
 
+// ---------- 3) 게임 시작 ----------
 function startGame(text) {
   const trimmed = text.trim();
   if (!trimmed) { alert('연습할 텍스트를 입력하거나 선택해주세요.'); return; }
@@ -154,14 +171,9 @@ function startGame(text) {
 hiddenInput.addEventListener('compositionstart', () => {
   composingFlag = true;
 });
-
-// compositionupdate: 자모가 추가/변경될 때마다 반드시 발생하는 이벤트.
-// 브라우저마다 'input' 이벤트의 타이밍이 미묘하게 달라(특히 데스크톱),
-// 이 이벤트를 함께 트리거로 써야 조합 중인 글자가 실시간으로 정확히 반영됩니다.
 hiddenInput.addEventListener('compositionupdate', () => {
   processInput();
 });
-
 hiddenInput.addEventListener('compositionend', () => {
   composingFlag = false;
   processInput();
@@ -212,7 +224,6 @@ function processInput() {
 }
 
 // ---------- 렌더링 ----------
-// 목표 텍스트 한 곳에서 '유령 텍스트 / 확정된 글자(정오답) / 지금 조합 중인 글자'를 모두 표시
 function renderTargetText(value, composing) {
   const committedLength = composing ? value.length - 1 : value.length;
   const composingIndex = composing ? value.length - 1 : -1;
@@ -223,15 +234,12 @@ function renderTargetText(value, composing) {
     span.className = 'char';
 
     if (i === composingIndex) {
-      // 조합 중: 목표 글자 자리에 실제로 지금 만들어지고 있는 글자를 그대로 표시
       span.textContent = value[i] ?? targetText[i];
       span.classList.add('composing');
     } else if (i < committedLength) {
-      // 확정됨: 목표 글자를 보여주되 맞았는지 여부로 색을 구분
       span.textContent = targetText[i];
       span.classList.add(value[i] === targetText[i] ? 'correct' : 'incorrect');
     } else {
-      // 아직 입력 전
       span.textContent = targetText[i];
       if (i === committedLength) span.classList.add('current');
     }
@@ -270,7 +278,7 @@ function formatTime(ms) {
   return `${min}:${sec}`;
 }
 
-// ---------- 종료 (완주 또는 '그만하기' 모두 여기로 모임) ----------
+// ---------- 4) 종료 ----------
 function finishGame() {
   if (finished) return;
   finished = true;
@@ -281,12 +289,12 @@ function finishGame() {
   const total = correctStrokes + wrongStrokes;
   const acc = total > 0 ? Math.round((correctStrokes / total) * 100) : 100;
   const cpm = elapsedMin > 0 ? Math.round(correctStrokes / elapsedMin) : 0;
-  const matchRate = calcMatchRate(targetText, hiddenInput.value); // 추가
+  const matchRate = calcMatchRate(targetText, hiddenInput.value);
 
   resultTime.textContent = formatTime(elapsedMs);
   resultCpm.textContent = cpm;
   resultAcc.textContent = acc + '%';
-  resultMatch.textContent = matchRate + '%'; // 추가
+  resultMatch.textContent = matchRate + '%';
   resultMistakes.textContent = wrongStrokes;
 
   hiddenInput.blur();
@@ -299,16 +307,16 @@ quitBtn.addEventListener('click', () => {
   if (confirmed) {
     finishGame();
   } else {
-    hiddenInput.focus(); // 취소 시 다시 입력 가능한 상태로 (모바일 키보드 재호출 포함)
+    hiddenInput.focus();
   }
 });
 retryBtn.addEventListener('click', () => startGame(targetText));
-homeBtn.addEventListener('click', () => showScreen('intro'));
+homeBtn.addEventListener('click', () => showScreen('welcome')); // 흐름의 맨 처음(이름/직급 입력)으로 복귀
 
 screens.game.addEventListener('click', () => hiddenInput.focus());
 
 // ---------- 초기화 ----------
 document.addEventListener('DOMContentLoaded', () => {
   customText.value = PRESETS[0];
-  showScreen('intro');
+  showScreen('welcome');
 });
