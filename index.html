@@ -39,15 +39,14 @@
 
     <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
 
+    <!-- 입력해야 하는 텍스트 + 조합 중인 글자를 같은 자리에서 함께 표시 -->
     <div id="targetText" class="target-text"></div>
-    <div id="typedEcho" class="typed-echo"></div>
 
-    <!-- 실제 입력을 받는 인풋 (화면엔 안 보이지만 모바일 키보드 호출용으로 반드시 필요) -->
+    <!-- 실제 입력을 받는 인풋 (화면엔 안 보이지만 모바일 키보드 호출용으로 필요) -->
     <input id="hiddenInput" class="hidden-input" type="text"
            autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
 
     <div class="game-actions">
-      <button id="restartBtn" class="btn-secondary">다시 시작</button>
       <button id="quitBtn" class="btn-secondary">그만하기</button>
     </div>
   </div>
@@ -63,8 +62,8 @@
       <div class="result-card"><span class="result-label">정타율</span><span id="resultAcc" class="result-value">0%</span></div>
       <div class="result-card"><span class="result-label">오타 수</span><span id="resultMistakes" class="result-value">0</span></div>
     </div>
-    <button id="retryBtn" class="btn-primary">다시 하기</button>
-    <button id="homeBtn" class="btn-secondary">처음으로</button>
+    <button id="retryBtn" class="btn-primary">다시하기</button>
+    <button id="homeBtn" class="btn-secondary">처음으로 돌아가기</button>
   </div>
 </section>
 
