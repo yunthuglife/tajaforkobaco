@@ -119,6 +119,14 @@ function startGame(text) {
 hiddenInput.addEventListener('compositionstart', () => {
   composingFlag = true;
 });
+
+// compositionupdate: 자모가 추가/변경될 때마다 반드시 발생하는 이벤트.
+// 브라우저마다 'input' 이벤트의 타이밍이 미묘하게 달라(특히 데스크톱),
+// 이 이벤트를 함께 트리거로 써야 조합 중인 글자가 실시간으로 정확히 반영됩니다.
+hiddenInput.addEventListener('compositionupdate', () => {
+  processInput();
+});
+
 hiddenInput.addEventListener('compositionend', () => {
   composingFlag = false;
   processInput();
@@ -249,7 +257,14 @@ function finishGame() {
 }
 
 // ---------- 버튼 ----------
-quitBtn.addEventListener('click', () => finishGame());
+quitBtn.addEventListener('click', () => {
+  const confirmed = confirm('연습을 그만하고 결과를 확인하시겠습니까?');
+  if (confirmed) {
+    finishGame();
+  } else {
+    hiddenInput.focus(); // 취소 시 다시 입력 가능한 상태로 (모바일 키보드 재호출 포함)
+  }
+});
 retryBtn.addEventListener('click', () => startGame(targetText));
 homeBtn.addEventListener('click', () => showScreen('intro'));
 
