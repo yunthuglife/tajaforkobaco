@@ -51,13 +51,11 @@ const presetButtons = Array.from(document.querySelectorAll('.preset-btn'));
 const customText = document.getElementById('customText');
 const startBtn = document.getElementById('startBtn');
 const targetTextEl = document.getElementById('targetText');
-const typedEchoEl = document.getElementById('typedEcho');
 const hiddenInput = document.getElementById('hiddenInput');
 const timeDisplay = document.getElementById('timeDisplay');
 const cpmDisplay = document.getElementById('cpmDisplay');
 const accDisplay = document.getElementById('accDisplay');
 const progressFill = document.getElementById('progressFill');
-const restartBtn = document.getElementById('restartBtn');
 const quitBtn = document.getElementById('quitBtn');
 const resultTime = document.getElementById('resultTime');
 const resultCpm = document.getElementById('resultCpm');
@@ -112,16 +110,12 @@ function startGame(text) {
   progressFill.style.width = '0%';
 
   renderTargetText('', false);
-  renderTypedEcho('', false);
 
   showScreen('game');
   setTimeout(() => hiddenInput.focus(), 50);
 }
 
 // ---------- 조합(IME) 상태 추적 ----------
-// 한글은 자음+모음(+받침)이 하나의 음절로 "조합"되는 과정을 거칩니다.
-// compositionstart~compositionend 사이를 '조합 중'으로 보고,
-// 조합이 끝나기 전까지는 해당 글자를 채점(확정)하지 않습니다.
 hiddenInput.addEventListener('compositionstart', () => {
   composingFlag = true;
 });
@@ -158,18 +152,15 @@ function processInput() {
     timerInterval = setInterval(updateTimer, 200);
   }
 
-  // 백스페이스 등으로 글자 수가 줄면 확정 인덱스도 되돌림
   if (value.length < prevValue.length) {
     finalizedIndex = Math.min(finalizedIndex, value.length - 1);
   }
 
-  // 조합 중이면 마지막 글자는 아직 미확정 (그 앞 글자까지만 확정)
   const committedUpTo = composing ? value.length - 2 : value.length - 1;
   if (committedUpTo > finalizedIndex) finalizeUpTo(value, committedUpTo);
 
   prevValue = value;
   renderTargetText(value, composing);
-  renderTypedEcho(value, composing);
   updateLiveStats(value);
 
   if (!composing && value.length >= targetText.length) {
@@ -178,42 +169,35 @@ function processInput() {
 }
 
 // ---------- 렌더링 ----------
+// 목표 텍스트 한 곳에서 '유령 텍스트 / 확정된 글자(정오답) / 지금 조합 중인 글자'를 모두 표시
 function renderTargetText(value, composing) {
+  const committedLength = composing ? value.length - 1 : value.length;
   const composingIndex = composing ? value.length - 1 : -1;
   const frag = document.createDocumentFragment();
+
   for (let i = 0; i < targetText.length; i++) {
     const span = document.createElement('span');
     span.className = 'char';
-    span.textContent = targetText[i];
+
     if (i === composingIndex) {
+      // 조합 중: 목표 글자 자리에 실제로 지금 만들어지고 있는 글자를 그대로 표시
+      span.textContent = value[i] ?? targetText[i];
       span.classList.add('composing');
-    } else if (i < value.length) {
+    } else if (i < committedLength) {
+      // 확정됨: 목표 글자를 보여주되 맞았는지 여부로 색을 구분
+      span.textContent = targetText[i];
       span.classList.add(value[i] === targetText[i] ? 'correct' : 'incorrect');
-    } else if (i === value.length) {
-      span.classList.add('current');
+    } else {
+      // 아직 입력 전
+      span.textContent = targetText[i];
+      if (i === committedLength) span.classList.add('current');
     }
+
     frag.appendChild(span);
   }
+
   targetTextEl.innerHTML = '';
   targetTextEl.appendChild(frag);
-}
-
-function renderTypedEcho(value, composing) {
-  typedEchoEl.innerHTML = '';
-  const committedPart = composing ? value.slice(0, -1) : value;
-  const composingChar = composing ? value.slice(-1) : '';
-
-  if (committedPart) {
-    const span = document.createElement('span');
-    span.textContent = committedPart;
-    typedEchoEl.appendChild(span);
-  }
-  if (composingChar) {
-    const span = document.createElement('span');
-    span.className = 'composing-char';
-    span.textContent = composingChar; // 조합 중인 글자: 타이핑할수록 실시간으로 바뀜
-    typedEchoEl.appendChild(span);
-  }
 }
 
 // ---------- 통계 ----------
@@ -243,8 +227,9 @@ function formatTime(ms) {
   return `${min}:${sec}`;
 }
 
-// ---------- 종료 ----------
+// ---------- 종료 (완주 또는 '그만하기' 모두 여기로 모임) ----------
 function finishGame() {
+  if (finished) return;
   finished = true;
   clearInterval(timerInterval);
 
@@ -264,11 +249,7 @@ function finishGame() {
 }
 
 // ---------- 버튼 ----------
-restartBtn.addEventListener('click', () => startGame(targetText));
-quitBtn.addEventListener('click', () => {
-  clearInterval(timerInterval);
-  showScreen('intro');
-});
+quitBtn.addEventListener('click', () => finishGame());
 retryBtn.addEventListener('click', () => startGame(targetText));
 homeBtn.addEventListener('click', () => showScreen('intro'));
 
