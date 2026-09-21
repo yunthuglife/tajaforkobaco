@@ -21,7 +21,12 @@ body {
 .screen.active { display: flex; }
 .container { width: 100%; max-width: 720px; position: relative; }
 
-h1 { text-align: center; font-size: 28px; margin-bottom: 24px; }
+h1 { text-align: center; font-size: 28px; margin-bottom: 12px; }
+
+/* 환영 화면 */
+.welcome-logo { display: block; margin: 0 auto 16px; max-width: 120px; height: auto; }
+.welcome-sub { text-align: center; color: #888; margin-bottom: 24px; font-size: 15px; }
+.text-input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; }
 
 /* 인트로 */
 .option-group { margin-bottom: 24px; }
@@ -54,8 +59,6 @@ h1 { text-align: center; font-size: 28px; margin-bottom: 24px; }
 .target-text .char.correct { color: var(--correct-color); }
 .target-text .char.incorrect { color: var(--incorrect-color); background: var(--incorrect-bg); border-radius: 3px; }
 .target-text .char.current { background: var(--current-bg); border-radius: 3px; }
-
-/* 지금 조합 중인 글자: 목표 텍스트의 같은 자리에서 실제 입력값을 실시간으로 보여줌 */
 .target-text .char.composing {
   color: var(--accent);
   font-weight: 700;
@@ -63,6 +66,13 @@ h1 { text-align: center; font-size: 28px; margin-bottom: 24px; }
   border-bottom: 2px solid var(--accent);
   border-radius: 3px;
   padding: 0 1px;
+}
+
+.hidden-input {
+  position: absolute; top: 0; left: 0;
+  width: 1px; height: 1px; opacity: 0; border: none; padding: 0;
+  font-size: 16px;
+  pointer-events: none;
 }
 
 .game-actions { display: flex; justify-content: center; }
