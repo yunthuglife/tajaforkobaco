@@ -3,7 +3,8 @@
   --correct-color: #111;
   --incorrect-bg: rgba(220,38,38,0.15);
   --incorrect-color: #dc2626;
-  --current-bg: rgba(37,99,235,0.15);
+  --current-bg: rgba(37,99,235,0.12);
+  --composing-bg: rgba(37,99,235,0.18);
   --accent: #2563eb;
 }
 
@@ -45,43 +46,27 @@ h1 { text-align: center; font-size: 28px; margin-bottom: 24px; }
 .progress-fill { height: 100%; width: 0%; background: var(--accent); transition: width 0.15s ease; }
 
 .target-text {
-  font-size: 26px; line-height: 1.7; letter-spacing: 0.5px;
+  font-size: 26px; line-height: 1.9; letter-spacing: 0.5px;
   padding: 20px; border: 1px solid #eee; border-radius: 12px;
-  margin-bottom: 16px; word-break: keep-all; white-space: pre-wrap; min-height: 120px;
+  margin-bottom: 24px; word-break: keep-all; white-space: pre-wrap; min-height: 120px;
 }
 .target-text .char { color: var(--ghost-color); transition: color 0.1s; }
 .target-text .char.correct { color: var(--correct-color); }
 .target-text .char.incorrect { color: var(--incorrect-color); background: var(--incorrect-bg); border-radius: 3px; }
 .target-text .char.current { background: var(--current-bg); border-radius: 3px; }
+
+/* 지금 조합 중인 글자: 목표 텍스트의 같은 자리에서 실제 입력값을 실시간으로 보여줌 */
 .target-text .char.composing {
   color: var(--accent);
-  background: rgba(37,99,235,0.15);
+  font-weight: 700;
+  background: var(--composing-bg);
   border-bottom: 2px solid var(--accent);
-  border-radius: 3px;
-}
-
-.typed-echo .composing-char {
-  border-bottom: 2px solid var(--accent);
-  background: rgba(37,99,235,0.15);
   border-radius: 3px;
   padding: 0 1px;
 }
 
-.typed-echo {
-  font-size: 20px; min-height: 32px; padding: 12px 16px;
-  border: 1px solid #ddd; border-radius: 8px; margin-bottom: 16px;
-  color: #333; white-space: pre-wrap; word-break: keep-all;
-}
-
-.hidden-input {
-  position: absolute; top: 0; left: 0;
-  width: 1px; height: 1px; opacity: 0; border: none; padding: 0;
-  font-size: 16px; /* iOS 자동 확대 방지 */
-  pointer-events: none; /* 다른 요소 클릭 방해 안 함, focus는 JS로 처리 */
-}
-
-.game-actions { display: flex; gap: 8px; }
-.game-actions button { flex: 1; }
+.game-actions { display: flex; justify-content: center; }
+.game-actions button { max-width: 240px; }
 
 /* 결과 화면 */
 .result-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 24px; }
@@ -91,6 +76,5 @@ h1 { text-align: center; font-size: 28px; margin-bottom: 24px; }
 
 @media (max-width: 480px) {
   .target-text { font-size: 20px; padding: 14px; }
-  .typed-echo { font-size: 16px; }
   h1 { font-size: 22px; }
 }
