@@ -53,6 +53,19 @@ h1 { text-align: center; font-size: 28px; margin-bottom: 24px; }
 .target-text .char.correct { color: var(--correct-color); }
 .target-text .char.incorrect { color: var(--incorrect-color); background: var(--incorrect-bg); border-radius: 3px; }
 .target-text .char.current { background: var(--current-bg); border-radius: 3px; }
+.target-text .char.composing {
+  color: var(--accent);
+  background: rgba(37,99,235,0.15);
+  border-bottom: 2px solid var(--accent);
+  border-radius: 3px;
+}
+
+.typed-echo .composing-char {
+  border-bottom: 2px solid var(--accent);
+  background: rgba(37,99,235,0.15);
+  border-radius: 3px;
+  padding: 0 1px;
+}
 
 .typed-echo {
   font-size: 20px; min-height: 32px; padding: 12px 16px;
