@@ -4,17 +4,39 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>kobaco 임직원 행동강령 타자연습</title>
+<link rel="icon" type="image/png" href="images/kobacofavicon.png">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<!-- 인트로 & 설정 화면 -->
-<section id="screen-intro" class="screen active">
+<!-- 1) 이름 & 직급 입력 화면 -->
+<section id="screen-welcome" class="screen active">
   <div class="container">
-    <h1>kobaco 임직원 행동강령 타자연습</h1>
+    <img src="images/kobacologo.png" alt="로고" class="welcome-logo">
+    <h1>환영합니다!</h1>
+    <p class="welcome-sub">타자연습을 시작하기 전에 정보를 입력해주세요.</p>
 
     <div class="option-group">
-      <label>연습 텍스트</label>
+      <label for="userNameInput">이름</label>
+      <input id="userNameInput" type="text" class="text-input" placeholder="예: 코바코" autocomplete="off">
+    </div>
+    <div class="option-group">
+      <label for="userPositionInput">직급</label>
+      <input id="userPositionInput" type="text" class="text-input" placeholder="예: 사원" autocomplete="off">
+    </div>
+
+    <button id="welcomeNextBtn" class="btn-primary">다음</button>
+  </div>
+</section>
+
+<!-- 2) 텍스트 선택 & 설정 화면 -->
+<section id="screen-intro" class="screen">
+  <div class="container">
+     <h1>kobaco 임직원 행동강령 타자연습</h1>
+    <p id="greetingText" class="welcome-sub"></p>
+
+    <div class="option-group">
+      <label>텍스트</label>
       <div class="preset-buttons" id="presetButtons">
         <button type="button" class="preset-btn active" data-preset="0">행동강령 제6조</button>
         <button type="button" class="preset-btn" data-preset="1">행동강령 제9조</button>
@@ -28,7 +50,7 @@
   </div>
 </section>
 
-<!-- 타자연습 화면 -->
+<!-- 3) 타자연습 화면 -->
 <section id="screen-game" class="screen">
   <div class="container">
     <div class="stat-bar">
@@ -39,10 +61,8 @@
 
     <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
 
-    <!-- 입력해야 하는 텍스트 + 조합 중인 글자를 같은 자리에서 함께 표시 -->
     <div id="targetText" class="target-text"></div>
 
-    <!-- 실제 입력을 받는 인풋 (화면엔 안 보이지만 모바일 키보드 호출용으로 필요) -->
     <input id="hiddenInput" class="hidden-input" type="text"
            autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
 
@@ -52,7 +72,7 @@
   </div>
 </section>
 
-<!-- 결과 화면 -->
+<!-- 4) 결과 화면 -->
 <section id="screen-result" class="screen">
   <div class="container">
     <h1>결과</h1>
