@@ -20,11 +20,11 @@ const DOUBLE_JONG = new Set(['ㄳ','ㄵ','ㄶ','ㄺ','ㄻ','ㄼ','ㄽ','ㄾ','�
 function keystrokesOf(char) {
   if (!char) return 0;
   const code = char.charCodeAt(0);
-  if (code < HANGUL_BASE || code > HANGUL_LAST) return 1; // 영문/숫자/공백/문장부호
+  if (code < HANGUL_BASE || code > HANGUL_LAST) return 1;
   const offset = code - HANGUL_BASE;
   const jongIdx = offset % 28;
   const jungIdx = Math.floor(offset / 28) % 21;
-  let strokes = 1; // 초성
+  let strokes = 1;
   strokes += DOUBLE_JUNG.has(JUNG[jungIdx]) ? 2 : 1;
   if (jongIdx > 0) strokes += DOUBLE_JONG.has(JONG[jongIdx]) ? 2 : 1;
   return strokes;
@@ -34,12 +34,12 @@ function keystrokesOf(char) {
 let targetText = '';
 let startTime = null;
 let timerInterval = null;
-let completionTimer = null;
 let finished = false;
 let correctStrokes = 0;
 let wrongStrokes = 0;
-let finalizedIndex = -1;
+let finalizedIndex = -1;    // 여기까지는 조합이 끝나 '확정'된 글자
 let prevValue = '';
+let composingFlag = false;  // compositionstart ~ compositionend 사이 true
 
 // ---------- DOM ----------
 const screens = {
@@ -102,8 +102,8 @@ function startGame(text) {
   wrongStrokes = 0;
   finalizedIndex = -1;
   prevValue = '';
+  composingFlag = false;
   clearInterval(timerInterval);
-  clearTimeout(completionTimer);
 
   hiddenInput.value = '';
   timeDisplay.textContent = '00:00';
@@ -111,82 +111,83 @@ function startGame(text) {
   accDisplay.textContent = '100%';
   progressFill.style.width = '0%';
 
-  renderTargetText('');
-  renderTypedEcho('');
+  renderTargetText('', false);
+  renderTypedEcho('', false);
 
   showScreen('game');
-  setTimeout(() => hiddenInput.focus(), 50); // 모바일 키보드 호출
+  setTimeout(() => hiddenInput.focus(), 50);
 }
 
-// ---------- 입력 처리 ----------
-function finalizeChar(index, typedChar) {
-  if (index < 0 || index >= targetText.length) return;
-  const expected = targetText[index];
-  const strokes = keystrokesOf(expected);
-  if (typedChar === expected) correctStrokes += strokes;
-  else wrongStrokes += strokes;
-}
+// ---------- 조합(IME) 상태 추적 ----------
+// 한글은 자음+모음(+받침)이 하나의 음절로 "조합"되는 과정을 거칩니다.
+// compositionstart~compositionend 사이를 '조합 중'으로 보고,
+// 조합이 끝나기 전까지는 해당 글자를 채점(확정)하지 않습니다.
+hiddenInput.addEventListener('compositionstart', () => {
+  composingFlag = true;
+});
+hiddenInput.addEventListener('compositionend', () => {
+  composingFlag = false;
+  processInput();
+});
+hiddenInput.addEventListener('input', () => {
+  processInput();
+});
 
 hiddenInput.addEventListener('paste', (e) => e.preventDefault());
 hiddenInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') e.preventDefault(); });
 
-hiddenInput.addEventListener('input', () => {
+function finalizeUpTo(value, upToIndexInclusive) {
+  for (let i = finalizedIndex + 1; i <= upToIndexInclusive; i++) {
+    if (i < 0 || i >= targetText.length) continue;
+    const expected = targetText[i];
+    const typedChar = value[i];
+    const strokes = keystrokesOf(expected);
+    if (typedChar === expected) correctStrokes += strokes;
+    else wrongStrokes += strokes;
+  }
+  if (upToIndexInclusive > finalizedIndex) finalizedIndex = upToIndexInclusive;
+}
+
+function processInput() {
   if (finished) return;
   const value = hiddenInput.value;
+  const composing = composingFlag;
 
   if (startTime === null && value.length > 0) {
     startTime = Date.now();
     timerInterval = setInterval(updateTimer, 200);
   }
 
-  if (value.length > prevValue.length) {
-    // 새 글자 슬롯이 생겼다는 것은 직전 글자의 조합(입력)이 끝났다는 뜻
-    const toFinalize = value.length - 2;
-    if (toFinalize >= 0 && toFinalize > finalizedIndex) {
-      finalizeChar(toFinalize, prevValue[toFinalize]);
-      finalizedIndex = toFinalize;
-    }
-  } else if (value.length < prevValue.length) {
-    // 백스페이스로 지운 경우
-    if (finalizedIndex >= value.length - 1) finalizedIndex = value.length - 2;
+  // 백스페이스 등으로 글자 수가 줄면 확정 인덱스도 되돌림
+  if (value.length < prevValue.length) {
+    finalizedIndex = Math.min(finalizedIndex, value.length - 1);
   }
+
+  // 조합 중이면 마지막 글자는 아직 미확정 (그 앞 글자까지만 확정)
+  const committedUpTo = composing ? value.length - 2 : value.length - 1;
+  if (committedUpTo > finalizedIndex) finalizeUpTo(value, committedUpTo);
 
   prevValue = value;
-  renderTargetText(value);
-  renderTypedEcho(value);
-  updateLiveStats();
+  renderTargetText(value, composing);
+  renderTypedEcho(value, composing);
+  updateLiveStats(value);
 
-  if (value.length >= targetText.length) scheduleCompletionCheck();
-  else clearTimeout(completionTimer);
-});
-
-function scheduleCompletionCheck() {
-  clearTimeout(completionTimer);
-  // 마지막 글자의 겹받침 등 조합이 끝나길 잠깐 기다린 뒤 종료 처리
-  completionTimer = setTimeout(() => {
-    if (finished) return;
-    if (hiddenInput.value.length >= targetText.length) completeExercise();
-  }, 350);
-}
-
-function completeExercise() {
-  const value = hiddenInput.value;
-  const lastIndex = targetText.length - 1;
-  if (lastIndex > finalizedIndex) {
-    finalizeChar(lastIndex, value[lastIndex]);
-    finalizedIndex = lastIndex;
+  if (!composing && value.length >= targetText.length) {
+    finishGame();
   }
-  finishGame();
 }
 
 // ---------- 렌더링 ----------
-function renderTargetText(value) {
+function renderTargetText(value, composing) {
+  const composingIndex = composing ? value.length - 1 : -1;
   const frag = document.createDocumentFragment();
   for (let i = 0; i < targetText.length; i++) {
     const span = document.createElement('span');
     span.className = 'char';
     span.textContent = targetText[i];
-    if (i < value.length) {
+    if (i === composingIndex) {
+      span.classList.add('composing');
+    } else if (i < value.length) {
       span.classList.add(value[i] === targetText[i] ? 'correct' : 'incorrect');
     } else if (i === value.length) {
       span.classList.add('current');
@@ -197,10 +198,26 @@ function renderTargetText(value) {
   targetTextEl.appendChild(frag);
 }
 
-function renderTypedEcho(value) { typedEchoEl.textContent = value; }
+function renderTypedEcho(value, composing) {
+  typedEchoEl.innerHTML = '';
+  const committedPart = composing ? value.slice(0, -1) : value;
+  const composingChar = composing ? value.slice(-1) : '';
+
+  if (committedPart) {
+    const span = document.createElement('span');
+    span.textContent = committedPart;
+    typedEchoEl.appendChild(span);
+  }
+  if (composingChar) {
+    const span = document.createElement('span');
+    span.className = 'composing-char';
+    span.textContent = composingChar; // 조합 중인 글자: 타이핑할수록 실시간으로 바뀜
+    typedEchoEl.appendChild(span);
+  }
+}
 
 // ---------- 통계 ----------
-function updateLiveStats() {
+function updateLiveStats(value) {
   const total = correctStrokes + wrongStrokes;
   const acc = total > 0 ? Math.round((correctStrokes / total) * 100) : 100;
   accDisplay.textContent = acc + '%';
@@ -209,14 +226,14 @@ function updateLiveStats() {
   const cpm = elapsedMin > 0 ? Math.round(correctStrokes / elapsedMin) : 0;
   cpmDisplay.textContent = cpm;
 
-  const progress = Math.min(100, Math.round((prevValue.length / targetText.length) * 100));
+  const progress = Math.min(100, Math.round((value.length / targetText.length) * 100));
   progressFill.style.width = progress + '%';
 }
 
 function updateTimer() {
   if (!startTime) return;
   timeDisplay.textContent = formatTime(Date.now() - startTime);
-  updateLiveStats();
+  updateLiveStats(hiddenInput.value);
 }
 
 function formatTime(ms) {
@@ -250,13 +267,11 @@ function finishGame() {
 restartBtn.addEventListener('click', () => startGame(targetText));
 quitBtn.addEventListener('click', () => {
   clearInterval(timerInterval);
-  clearTimeout(completionTimer);
   showScreen('intro');
 });
 retryBtn.addEventListener('click', () => startGame(targetText));
 homeBtn.addEventListener('click', () => showScreen('intro'));
 
-// 게임 화면 아무 곳이나 탭하면 키보드가 다시 뜨도록 (모바일 대응)
 screens.game.addEventListener('click', () => hiddenInput.focus());
 
 // ---------- 초기화 ----------
