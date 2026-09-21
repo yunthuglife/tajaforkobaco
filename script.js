@@ -83,6 +83,7 @@ const welcomeNextBtn = document.getElementById('welcomeNextBtn');
 const userNameInput = document.getElementById('userNameInput');
 const userPositionInput = document.getElementById('userPositionInput');
 const greetingText = document.getElementById('greetingText');
+const resultUserInfo = document.getElementById('resultUserInfo');
 
 const presetButtons = Array.from(document.querySelectorAll('.preset-btn'));
 const customText = document.getElementById('customText');
@@ -291,6 +292,7 @@ function finishGame() {
   const cpm = elapsedMin > 0 ? Math.round(correctStrokes / elapsedMin) : 0;
   const matchRate = calcMatchRate(targetText, hiddenInput.value);
 
+  resultUserInfo.textContent = `${userName} ${userPosition}님의 기록`; // 추가
   resultTime.textContent = formatTime(elapsedMs);
   resultCpm.textContent = cpm;
   resultAcc.textContent = acc + '%';
