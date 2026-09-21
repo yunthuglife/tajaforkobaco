@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>한글 타자연습</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- 인트로 & 설정 화면 -->
+<section id="screen-intro" class="screen active">
+  <div class="container">
+    <h1>한글 타자연습</h1>
+
+    <div class="option-group">
+      <label>연습 텍스트</label>
+      <div class="preset-buttons" id="presetButtons">
+        <button type="button" class="preset-btn active" data-preset="0">기본 문장</button>
+        <button type="button" class="preset-btn" data-preset="1">속담</button>
+        <button type="button" class="preset-btn" data-preset="2">긴 문단</button>
+        <button type="button" class="preset-btn" data-preset="custom">직접 입력</button>
+      </div>
+      <textarea id="customText" rows="4" disabled placeholder="여기에 연습하고 싶은 문장을 입력하세요."></textarea>
+    </div>
+
+    <button id="startBtn" class="btn-primary">시작하기</button>
+  </div>
+</section>
+
+<!-- 타자연습 화면 -->
+<section id="screen-game" class="screen">
+  <div class="container">
+    <div class="stat-bar">
+      <div class="stat"><span class="stat-label">시간</span><span id="timeDisplay" class="stat-value">00:00</span></div>
+      <div class="stat"><span class="stat-label">타수</span><span id="cpmDisplay" class="stat-value">0</span></div>
+      <div class="stat"><span class="stat-label">정타율</span><span id="accDisplay" class="stat-value">100%</span></div>
+    </div>
+
+    <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+
+    <div id="targetText" class="target-text"></div>
+    <div id="typedEcho" class="typed-echo"></div>
+
+    <!-- 실제 입력을 받는 인풋 (화면엔 안 보이지만 모바일 키보드 호출용으로 반드시 필요) -->
+    <input id="hiddenInput" class="hidden-input" type="text"
+           autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+
+    <div class="game-actions">
+      <button id="restartBtn" class="btn-secondary">다시 시작</button>
+      <button id="quitBtn" class="btn-secondary">그만하기</button>
+    </div>
+  </div>
+</section>
+
+<!-- 결과 화면 -->
+<section id="screen-result" class="screen">
+  <div class="container">
+    <h1>결과</h1>
+    <div class="result-grid">
+      <div class="result-card"><span class="result-label">걸린 시간</span><span id="resultTime" class="result-value">00:00</span></div>
+      <div class="result-card"><span class="result-label">분당 타수</span><span id="resultCpm" class="result-value">0</span></div>
+      <div class="result-card"><span class="result-label">정타율</span><span id="resultAcc" class="result-value">0%</span></div>
+      <div class="result-card"><span class="result-label">오타 수</span><span id="resultMistakes" class="result-value">0</span></div>
+    </div>
+    <button id="retryBtn" class="btn-primary">다시 하기</button>
+    <button id="homeBtn" class="btn-secondary">처음으로</button>
+  </div>
+</section>
+
+<script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,83 @@
+:root {
+  --ghost-color: rgba(0,0,0,0.22);
+  --correct-color: #111;
+  --incorrect-bg: rgba(220,38,38,0.15);
+  --incorrect-color: #dc2626;
+  --current-bg: rgba(37,99,235,0.15);
+  --accent: #2563eb;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+  background: #ffffff;
+  color: #111;
+}
+
+.screen { display: none; min-height: 100vh; align-items: center; justify-content: center; padding: 24px 16px; }
+.screen.active { display: flex; }
+.container { width: 100%; max-width: 720px; position: relative; }
+
+h1 { text-align: center; font-size: 28px; margin-bottom: 24px; }
+
+/* 인트로 */
+.option-group { margin-bottom: 24px; }
+.option-group > label { display: block; font-weight: 600; margin-bottom: 8px; }
+.preset-buttons { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+.preset-btn { padding: 8px 14px; border: 1px solid #ddd; border-radius: 999px; background: #fff; cursor: pointer; font-size: 14px; }
+.preset-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+#customText { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; resize: vertical; }
+#customText:disabled { background: #f7f7f7; color: #999; }
+
+.btn-primary, .btn-secondary { display: block; width: 100%; border: none; border-radius: 8px; font-size: 16px; padding: 12px 20px; cursor: pointer; }
+.btn-primary { background: var(--accent); color: #fff; }
+.btn-secondary { background: #f0f0f0; color: #333; margin-top: 8px; }
+
+/* 타자연습 화면 */
+.stat-bar { display: flex; justify-content: space-between; margin-bottom: 12px; }
+.stat { display: flex; flex-direction: column; align-items: center; flex: 1; }
+.stat-label { font-size: 12px; color: #888; }
+.stat-value { font-size: 20px; font-weight: 700; }
+
+.progress-track { height: 4px; background: #eee; border-radius: 2px; margin-bottom: 24px; overflow: hidden; }
+.progress-fill { height: 100%; width: 0%; background: var(--accent); transition: width 0.15s ease; }
+
+.target-text {
+  font-size: 26px; line-height: 1.7; letter-spacing: 0.5px;
+  padding: 20px; border: 1px solid #eee; border-radius: 12px;
+  margin-bottom: 16px; word-break: keep-all; white-space: pre-wrap; min-height: 120px;
+}
+.target-text .char { color: var(--ghost-color); transition: color 0.1s; }
+.target-text .char.correct { color: var(--correct-color); }
+.target-text .char.incorrect { color: var(--incorrect-color); background: var(--incorrect-bg); border-radius: 3px; }
+.target-text .char.current { background: var(--current-bg); border-radius: 3px; }
+
+.typed-echo {
+  font-size: 20px; min-height: 32px; padding: 12px 16px;
+  border: 1px solid #ddd; border-radius: 8px; margin-bottom: 16px;
+  color: #333; white-space: pre-wrap; word-break: keep-all;
+}
+
+.hidden-input {
+  position: absolute; top: 0; left: 0;
+  width: 1px; height: 1px; opacity: 0; border: none; padding: 0;
+  font-size: 16px; /* iOS 자동 확대 방지 */
+  pointer-events: none; /* 다른 요소 클릭 방해 안 함, focus는 JS로 처리 */
+}
+
+.game-actions { display: flex; gap: 8px; }
+.game-actions button { flex: 1; }
+
+/* 결과 화면 */
+.result-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 24px; }
+.result-card { display: flex; flex-direction: column; align-items: center; padding: 20px; border: 1px solid #eee; border-radius: 12px; }
+.result-label { font-size: 13px; color: #888; margin-bottom: 6px; }
+.result-value { font-size: 28px; font-weight: 700; }
+
+@media (max-width: 480px) {
+  .target-text { font-size: 20px; padding: 14px; }
+  .typed-echo { font-size: 16px; }
+  h1 { font-size: 22px; }
+}
