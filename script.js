@@ -30,6 +30,40 @@ function keystrokesOf(char) {
   return strokes;
 }
 
+// 두 문자열 간 편집 거리(삽입/삭제/치환 최소 횟수) 계산
+function levenshteinDistance(a, b) {
+  const m = a.length, n = b.length;
+  if (m === 0) return n;
+  if (n === 0) return m;
+
+  let prev = new Array(n + 1);
+  let curr = new Array(n + 1);
+  for (let j = 0; j <= n; j++) prev[j] = j;
+
+  for (let i = 1; i <= m; i++) {
+    curr[0] = i;
+    for (let j = 1; j <= n; j++) {
+      const cost = a[i - 1] === b[j - 1] ? 0 : 1;
+      curr[j] = Math.min(
+        prev[j] + 1,       // 삭제
+        curr[j - 1] + 1,   // 삽입
+        prev[j - 1] + cost // 치환(또는 일치)
+      );
+    }
+    [prev, curr] = [curr, prev];
+  }
+  return prev[n];
+}
+
+// 최종 입력 텍스트가 목표 텍스트와 얼마나 일치하는지(%)
+function calcMatchRate(target, typed) {
+  if (target.length === 0) return 100;
+  const distance = levenshteinDistance(target, typed);
+  const maxLen = Math.max(target.length, typed.length);
+  if (maxLen === 0) return 100;
+  return Math.max(0, Math.round((1 - distance / maxLen) * 100));
+}
+
 // ---------- 상태 ----------
 let targetText = '';
 let startTime = null;
@@ -61,6 +95,7 @@ const resultTime = document.getElementById('resultTime');
 const resultCpm = document.getElementById('resultCpm');
 const resultAcc = document.getElementById('resultAcc');
 const resultMistakes = document.getElementById('resultMistakes');
+const resultMatch = document.getElementById('resultMatch'); // 추가
 const retryBtn = document.getElementById('retryBtn');
 const homeBtn = document.getElementById('homeBtn');
 
@@ -246,10 +281,12 @@ function finishGame() {
   const total = correctStrokes + wrongStrokes;
   const acc = total > 0 ? Math.round((correctStrokes / total) * 100) : 100;
   const cpm = elapsedMin > 0 ? Math.round(correctStrokes / elapsedMin) : 0;
+  const matchRate = calcMatchRate(targetText, hiddenInput.value); // 추가
 
   resultTime.textContent = formatTime(elapsedMs);
   resultCpm.textContent = cpm;
   resultAcc.textContent = acc + '%';
+  resultMatch.textContent = matchRate + '%'; // 추가
   resultMistakes.textContent = wrongStrokes;
 
   hiddenInput.blur();
