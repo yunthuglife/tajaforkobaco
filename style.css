@@ -93,3 +93,8 @@ h1 { text-align: center; font-size: 28px; margin-bottom: 12px; }
   .target-text { font-size: 20px; padding: 14px; }
   h1 { font-size: 22px; }
 }
+
+.capture-area {
+  background: #fff;
+  padding: 8px 4px;
+}
