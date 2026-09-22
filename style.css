@@ -85,6 +85,15 @@ h1 { text-align: center; font-size: 28px; margin-bottom: 12px; }
   gap: 12px;
   margin-bottom: 24px;
 }
+.result-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px; /* 버튼 사이 간격. 더 넓게 하고 싶으면 이 숫자만 키우면 됩니다 */
+}
+.result-actions .btn-primary,
+.result-actions .btn-secondary {
+  margin-top: 0; /* 컨테이너의 gap이 간격을 책임지므로 기존 margin-top은 무효화 */
+}
 .result-card { display: flex; flex-direction: column; align-items: center; padding: 20px; border: 1px solid #eee; border-radius: 12px; }
 .result-label { font-size: 13px; color: #888; margin-bottom: 6px; }
 .result-value { font-size: 28px; font-weight: 700; }
