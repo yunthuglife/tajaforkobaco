@@ -75,15 +75,18 @@
 <!-- 4) 결과 화면 -->
 <section id="screen-result" class="screen">
   <div class="container">
-    <h1>결과</h1>
-    <p id="resultUserInfo" class="welcome-sub"></p>
-    <div class="result-grid">
-      <div class="result-card"><span class="result-label">걸린 시간</span><span id="resultTime" class="result-value">00:00</span></div>
-      <div class="result-card"><span class="result-label">분당 타수</span><span id="resultCpm" class="result-value">0</span></div>
-      <div class="result-card"><span class="result-label">정타율</span><span id="resultAcc" class="result-value">0%</span></div>
-      <div class="result-card"><span class="result-label">일치율</span><span id="resultMatch" class="result-value">0%</span></div>
-      <div class="result-card"><span class="result-label">오타 수</span><span id="resultMistakes" class="result-value">0</span></div>
+    <div id="captureArea" class="capture-area">
+      <h1>결과</h1>
+      <p id="resultUserInfo" class="welcome-sub"></p>
+      <div class="result-grid">
+        <div class="result-card"><span class="result-label">걸린 시간</span><span id="resultTime" class="result-value">00:00</span></div>
+        <div class="result-card"><span class="result-label">분당 타수</span><span id="resultCpm" class="result-value">0</span></div>
+        <div class="result-card"><span class="result-label">정타율</span><span id="resultAcc" class="result-value">0%</span></div>
+        <div class="result-card"><span class="result-label">일치율</span><span id="resultMatch" class="result-value">0%</span></div>
+        <div class="result-card"><span class="result-label">오타 수</span><span id="resultMistakes" class="result-value">0</span></div>
+      </div>
     </div>
+    <button id="screenshotBtn" class="btn-secondary">스크린샷 저장</button>
     <button id="retryBtn" class="btn-primary">다시하기</button>
     <button id="homeBtn" class="btn-secondary">처음으로 돌아가기</button>
   </div>
