@@ -59,6 +59,23 @@ function calcMatchRate(target, typed) {
   return Math.max(0, Math.round((1 - distance / maxLen) * 100));
 }
 
+// 파일명에 쓸 수 없는 문자(\/:*?"<>|)와 공백을 제거
+function sanitizeForFilename(text) {
+  return text.replace(/[\\/:*?"<>|\s]/g, '');
+}
+
+// 현재 시각을 파일명에 쓸 수 있는 형식으로 변환 (예: 20260922_153045)
+function formatTimestampForFilename(date) {
+  const pad = (n) => String(n).padStart(2, '0');
+  const yyyy = date.getFullYear();
+  const mm = pad(date.getMonth() + 1);
+  const dd = pad(date.getDate());
+  const hh = pad(date.getHours());
+  const min = pad(date.getMinutes());
+  const ss = pad(date.getSeconds());
+  return `${yyyy}${mm}${dd}_${hh}${min}${ss}`;
+}
+
 // ---------- 상태 ----------
 let userName = '';
 let userPosition = '';
@@ -99,6 +116,8 @@ const resultTime = document.getElementById('resultTime');
 const resultCpm = document.getElementById('resultCpm');
 const resultAcc = document.getElementById('resultAcc');
 const resultMatch = document.getElementById('resultMatch');
+const screenshotBtn = document.getElementById('screenshotBtn'); // 추가
+const captureArea = document.getElementById('captureArea');     // 추가
 const resultMistakes = document.getElementById('resultMistakes');
 const retryBtn = document.getElementById('retryBtn');
 const homeBtn = document.getElementById('homeBtn');
@@ -311,6 +330,37 @@ quitBtn.addEventListener('click', () => {
   } else {
     hiddenInput.focus();
   }
+});
+screenshotBtn.addEventListener('click', () => {
+  screenshotBtn.disabled = true;
+  screenshotBtn.textContent = '이미지 생성 중...';
+
+  html2canvas(captureArea, {
+    backgroundColor: '#ffffff',
+    scale: 2 // 고해상도로 캡처 (기본 1배율은 화질이 다소 떨어짐)
+  }).then((canvas) => {
+    const dataUrl = canvas.toDataURL('image/jpeg', 0.92);
+
+   // 파일명: 시간_이름_직급.jpg  (예: 20260922_153045_홍길동_대리.jpg)
+   // '시간'은 연습 소요 시간이 아니라 캡처(저장 버튼 클릭)한 시점의 날짜+시각
+    const safeTimestamp = formatTimestampForFilename(new Date());
+    const safeName = sanitizeForFilename(userName);
+    const safePosition = sanitizeForFilename(userPosition);
+    const filename = `${safeTimestamp}_${safeName}_${safePosition}.jpg`;
+
+    const link = document.createElement('a');
+    link.href = dataUrl;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }).catch((err) => {
+    console.error('스크린샷 생성 실패:', err);
+    alert('스크린샷 생성에 실패했습니다. 다시 시도해주세요.');
+  }).finally(() => {
+    screenshotBtn.disabled = false;
+    screenshotBtn.textContent = '스크린샷 저장';
+  });
 });
 retryBtn.addEventListener('click', () => startGame(targetText));
 homeBtn.addEventListener('click', () => showScreen('welcome')); // 흐름의 맨 처음(이름/직급 입력)으로 복귀
