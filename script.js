@@ -183,10 +183,6 @@ function startGame(text) {
 
   renderTargetText('', false);
   // 전체 텍스트를 다 그린 상태의 높이를 프레임 높이로 고정 (타이핑 중 박스 크기 변동 방지)
-  targetTextEl.style.minHeight = '';
-  requestAnimationFrame(() => {
-    targetTextEl.style.minHeight = targetTextEl.scrollHeight + 'px';
-  });
 
   showScreen('game');
   setTimeout(() => hiddenInput.focus(), 50);
