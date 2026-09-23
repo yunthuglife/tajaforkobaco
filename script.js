@@ -258,8 +258,9 @@ function renderTargetText(value, composing) {
       span.textContent = value[i] ?? targetText[i];
       span.classList.add('composing');
     } else if (i < committedLength) {
-      span.textContent = targetText[i];
-      span.classList.add(value[i] === targetText[i] ? 'correct' : 'incorrect');
+      const isCorrect = value[i] === targetText[i];
+      span.textContent = isCorrect ? targetText[i] : value[i]; // 틀렸을 때는 실제로 입력한 글자를 그대로 표시
+      span.classList.add(isCorrect ? 'correct' : 'incorrect');      
     } else {
       span.textContent = targetText[i];
       if (i === committedLength) span.classList.add('current');
