@@ -53,7 +53,9 @@ h1 { text-align: center; font-size: 28px; margin-bottom: 12px; }
 .target-text {
   font-size: 26px; line-height: 1.9; letter-spacing: 0.5px;
   padding: 20px; border: 1px solid #eee; border-radius: 12px;
-  margin-bottom: 24px; word-break: keep-all; white-space: pre-wrap; min-height: 120px;
+  margin-bottom: 24px; word-break: keep-all; white-space: pre-wrap;
+  height: 320px;       /* 내용과 상관없이 항상 이 높이로 고정 */
+  overflow-y: auto;    /* 혹시 텍스트가 넘치면 스크롤로 처리, 박스 크기는 안 바뀜 */
 }
 .target-text .char { color: var(--ghost-color); transition: color 0.1s; }
 .target-text .char.correct { color: var(--correct-color); }
@@ -97,7 +99,7 @@ h1 { text-align: center; font-size: 28px; margin-bottom: 12px; }
 .result-value { font-size: 28px; font-weight: 700; }
 
 @media (max-width: 480px) {
-  .target-text { font-size: 20px; padding: 14px; }
+  .target-text { font-size: 20px; padding: 14px; height: 260px; }
   h1 { font-size: 22px; }
 }
 
