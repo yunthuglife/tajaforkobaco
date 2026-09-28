@@ -245,7 +245,21 @@ function processInput() {
   }
 }
 
-// ---------- 렌더링 ----------
+// 현재 입력 위치의 글자가 있는 줄을 텍스트 박스 중앙에 오도록 박스 내부만 스크롤
+function keepActiveCharInView() {
+  const activeEl = targetTextEl.querySelector('.composing') || targetTextEl.querySelector('.current');
+  if (!activeEl) return;
+
+  const boxRect = targetTextEl.getBoundingClientRect();
+  const elRect = activeEl.getBoundingClientRect();
+
+  // 글자의 위치를 '박스 내용 전체 기준'으로 환산
+  const elTopInContent = elRect.top - boxRect.top + targetTextEl.scrollTop;
+  const desiredScrollTop = elTopInContent - (targetTextEl.clientHeight / 2) + (elRect.height / 2);
+
+  targetTextEl.scrollTop = Math.max(0, desiredScrollTop);
+}
+
 function renderTargetText(value, composing) {
   const committedLength = composing ? value.length - 1 : value.length;
   const composingIndex = composing ? value.length - 1 : -1;
@@ -260,8 +274,8 @@ function renderTargetText(value, composing) {
       span.classList.add('composing');
     } else if (i < committedLength) {
       const isCorrect = value[i] === targetText[i];
-      span.textContent = isCorrect ? targetText[i] : value[i]; // 틀렸을 때는 실제로 입력한 글자를 그대로 표시
-      span.classList.add(isCorrect ? 'correct' : 'incorrect');      
+      span.textContent = isCorrect ? targetText[i] : value[i];
+      span.classList.add(isCorrect ? 'correct' : 'incorrect');
     } else {
       span.textContent = targetText[i];
       if (i === committedLength) span.classList.add('current');
@@ -270,8 +284,11 @@ function renderTargetText(value, composing) {
     frag.appendChild(span);
   }
 
+  const prevScrollTop = targetTextEl.scrollTop;   // 추가: 다시 그리기 전 스크롤 위치 저장
   targetTextEl.innerHTML = '';
   targetTextEl.appendChild(frag);
+  targetTextEl.scrollTop = prevScrollTop;         // 추가: 다시 그린 뒤 스크롤 위치 복원
+  keepActiveCharInView();                         // 추가: 현재 글자가 보이도록 스크롤 조정
 }
 
 // ---------- 통계 ----------
