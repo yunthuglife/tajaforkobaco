@@ -99,7 +99,8 @@ h1 { text-align: center; font-size: 28px; margin-bottom: 12px; }
 .result-value { font-size: 28px; font-weight: 700; }
 
 @media (max-width: 480px) {
-  .target-text { font-size: 20px; padding: 14px; height: 260px; }
+  .target-text { font-size: 20px; padding: 14px; height: 200px; }
+  #screen-game { align-items: flex-start; padding-top: 16px; }
   h1 { font-size: 22px; }
 }
 
