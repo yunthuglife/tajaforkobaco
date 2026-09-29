@@ -2,6 +2,9 @@
 // 한글 타자연습 게임
 // ============================================
 
+// 2단계에서 복사한 Apps Script 웹 앱 URL (이 값이 비어 있으면 기록 전송을 건너뜀)
+const SHEET_API_URL = 'https://script.google.com/macros/s/AKfycbxspEuKFvqcvJKYOETKg31Y9-gp3xngqAMUASu2zt23x23rdCdkxs_bwZUtPiCOHAXe/exec';
+
 // ---------- 프리셋 연습 텍스트 ----------
 const PRESETS = [
   "제6조(투명하고 공정한 직무수행) 임직원은 공사인으로서 자긍심과 높은 윤리적 가치관을 가지고 제 규정을 준수하여 공정하고 성실하게 직무를 수행하여야 하며 건전한 기업문화 조성을 위해 노력하여야 한다.",
@@ -65,6 +68,26 @@ function sanitizeForFilename(text) {
   return text.replace(/[\\/:*?"<>|\s]/g, '');
 }
 
+// 결과를 Google 스프레드시트로 전송
+async function saveRecord(record) {
+  if (!SHEET_API_URL) return;
+  saveStatus.textContent = '기록 저장 중...';
+  try {
+    // 주의: headers에 'Content-Type: application/json'을 지정하면 안 됩니다.
+    // (지정하면 브라우저가 사전 요청을 보내고 Apps Script가 이를 처리하지 못해 실패함)
+    const res = await fetch(SHEET_API_URL, {
+      method: 'POST',
+      body: JSON.stringify(record)
+    });
+    const result = await res.json();
+    if (!result.ok) throw new Error(result.error || '저장 실패');
+    saveStatus.textContent = '기록이 저장되었습니다.';
+  } catch (err) {
+    console.error('기록 저장 실패:', err);
+    saveStatus.textContent = '기록 저장에 실패했습니다. 스크린샷으로 결과를 남겨주세요.';
+  }
+}
+
 // 현재 시각을 파일명에 쓸 수 있는 형식으로 변환 (예: 20260922_153045)
 function formatTimestampForFilename(date) {
   const pad = (n) => String(n).padStart(2, '0');
@@ -102,6 +125,7 @@ const userNameInput = document.getElementById('userNameInput');
 const userPositionInput = document.getElementById('userPositionInput');
 const greetingText = document.getElementById('greetingText');
 const resultUserInfo = document.getElementById('resultUserInfo');
+const saveStatus = document.getElementById('saveStatus');
 
 const presetButtons = Array.from(document.querySelectorAll('.preset-btn'));
 const customText = document.getElementById('customText');
@@ -331,15 +355,30 @@ function finishGame() {
   const cpm = elapsedMin > 0 ? Math.round(correctStrokes / elapsedMin) : 0;
   const matchRate = calcMatchRate(targetText, hiddenInput.value);
 
-  resultUserInfo.textContent = `${userName} ${userPosition}님의 기록`; // 추가
+  resultUserInfo.textContent = `${userName} ${userPosition}님의 기록`;
   resultTime.textContent = formatTime(elapsedMs);
   resultCpm.textContent = cpm;
   resultAcc.textContent = acc + '%';
   resultMatch.textContent = matchRate + '%';
   resultMistakes.textContent = wrongStrokes;
+  saveStatus.textContent = '';
 
   hiddenInput.blur();
   showScreen('result');
+
+  // 추가: 스프레드시트로 기록 전송
+  saveRecord({
+    name: userName,
+    position: userPosition,
+    elapsedSec: Math.round(elapsedMs / 1000),
+    cpm: cpm,
+    accuracy: acc,
+    matchRate: matchRate,
+    mistakes: wrongStrokes,
+    completed: hiddenInput.value.length >= targetText.length,
+    textPreview: targetText.slice(0, 20),
+    textLength: targetText.length
+  });
 }
 
 // ---------- 버튼 ----------
