@@ -6,12 +6,7 @@
 const SHEET_API_URL = 'https://script.google.com/macros/s/AKfycbxspEuKFvqcvJKYOETKg31Y9-gp3xngqAMUASu2zt23x23rdCdkxs_bwZUtPiCOHAXe/exec';
 
 // ---------- 프리셋 연습 텍스트 ----------
-const PRESETS = [
-  "제6조(투명하고 공정한 직무수행) 임직원은 공사인으로서 자긍심과 높은 윤리적 가치관을 가지고 제 규정을 준수하여 공정하고 성실하게 직무를 수행하여야 하며 건전한 기업문화 조성을 위해 노력하여야 한다.",
-  "제9조(특혜 및 차별 배제) 임직원은 직무를 수행함에 있어서 혈연, 지연, 학연, 종교 등을 이유로 직무관련자나 다른 직원에게 특혜를 주거나 특정인을 차별하여서는 아니 된다.",
-  "제24조(성관련 비위행위 금지) 임직원은 상대방의 인권을 침해하고 공직자로서의 품위를 손상시키는 성희롱, 성폭력, 성매매 등 성범죄 행위를 하여서는 아니 된다.",
-  "우리 공사는 기명 신고채널인 고충상담창구(인사팀, 노조, 사이버), 익명이 보장되는 외부위탁 신고채널인 K-휘슬(redwhistle.org), 그리고 국민권익위원회 청렴포털(clean.go.kr)을 통해 부패행위 신고를 받고 있다."
-];
+const PRACTICE_TEXT = "우리 공사는 기명 신고채널인 고충상담창구(인사팀, 노조, 사이버), 익명이 보장되는 외부위탁 신고채널인 K-휘슬(redwhistle.org), 그리고 국민권익위원회 청렴포털(clean.go.kr)을 통해 부패행위 신고를 받고 있다.";
 
 // ---------- 한글 분해 기반 실제 타수(키 입력 횟수) 계산 ----------
 const HANGUL_BASE = 0xAC00;
@@ -127,8 +122,7 @@ const greetingText = document.getElementById('greetingText');
 const resultUserInfo = document.getElementById('resultUserInfo');
 const saveStatus = document.getElementById('saveStatus');
 
-const presetButtons = Array.from(document.querySelectorAll('.preset-btn'));
-const customText = document.getElementById('customText');
+const practicePreview = document.getElementById('practicePreview');
 const startBtn = document.getElementById('startBtn');
 const targetTextEl = document.getElementById('targetText');
 const hiddenInput = document.getElementById('hiddenInput');
@@ -167,23 +161,7 @@ welcomeNextBtn.addEventListener('click', () => {
 });
 
 // ---------- 2) 프리셋 선택 ----------
-presetButtons.forEach(btn => {
-  btn.addEventListener('click', () => {
-    presetButtons.forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    const val = btn.dataset.preset;
-    if (val === 'custom') {
-      customText.value = '';
-      customText.disabled = false;
-      customText.focus();
-    } else {
-      customText.value = PRESETS[Number(val)];
-      customText.disabled = true;
-    }
-  });
-});
-
-startBtn.addEventListener('click', () => startGame(customText.value));
+startBtn.addEventListener('click', () => startGame(PRACTICE_TEXT));
 
 // ---------- 3) 게임 시작 ----------
 function startGame(text) {
@@ -428,6 +406,6 @@ screens.game.addEventListener('click', () => hiddenInput.focus());
 
 // ---------- 초기화 ----------
 document.addEventListener('DOMContentLoaded', () => {
-  customText.value = PRESETS[0];
+  practicePreview.textContent = PRACTICE_TEXT;
   showScreen('welcome');
 });
