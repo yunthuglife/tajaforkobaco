@@ -6,7 +6,7 @@
 const SHEET_API_URL = 'https://script.google.com/macros/s/AKfycbxspEuKFvqcvJKYOETKg31Y9-gp3xngqAMUASu2zt23x23rdCdkxs_bwZUtPiCOHAXe/exec';
 
 // ---------- 프리셋 연습 텍스트 ----------
-const PRACTICE_TEXT = "우리 공사는 기명 신고채널인 고충상담창구(인사팀, 노조, 사이버), 익명이 보장되는 외부위탁 신고채널인 레드휘슬, 그리고 국민권익위원회 청렴포털을 통해 부패행위 신고를 받고 있다.";
+const PRACTICE_TEXT = "우리 공사는 기명 신고채널인 고충상담창구(인사팀, 노조, 사이버), 익명이 보장되는 외부위탁 신고채널인 K-휘슬, 그리고 국민권익위원회 청렴포털을 통해 부패행위 신고를 받고 있다.";
 
 // ---------- 한글 분해 기반 실제 타수(키 입력 횟수) 계산 ----------
 const HANGUL_BASE = 0xAC00;
