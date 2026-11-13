@@ -128,12 +128,10 @@ const targetTextEl = document.getElementById('targetText');
 const hiddenInput = document.getElementById('hiddenInput');
 const timeDisplay = document.getElementById('timeDisplay');
 const cpmDisplay = document.getElementById('cpmDisplay');
-const accDisplay = document.getElementById('accDisplay');
 const progressFill = document.getElementById('progressFill');
 const quitBtn = document.getElementById('quitBtn');
 const resultTime = document.getElementById('resultTime');
 const resultCpm = document.getElementById('resultCpm');
-const resultAcc = document.getElementById('resultAcc');
 const resultMatch = document.getElementById('resultMatch');
 const screenshotBtn = document.getElementById('screenshotBtn'); // 추가
 const captureArea = document.getElementById('captureArea');     // 추가
@@ -181,7 +179,6 @@ function startGame(text) {
   hiddenInput.value = '';
   timeDisplay.textContent = '00:00';
   cpmDisplay.textContent = '0';
-  accDisplay.textContent = '100%';
   progressFill.style.width = '0%';
 
   renderTargetText('', false);
@@ -295,10 +292,6 @@ function renderTargetText(value, composing) {
 
 // ---------- 통계 ----------
 function updateLiveStats(value) {
-  const total = correctStrokes + wrongStrokes;
-  const acc = total > 0 ? Math.round((correctStrokes / total) * 100) : 100;
-  accDisplay.textContent = acc + '%';
-
   const elapsedMin = startTime ? (Date.now() - startTime) / 60000 : 0;
   const cpm = elapsedMin > 0 ? Math.round(correctStrokes / elapsedMin) : 0;
   cpmDisplay.textContent = cpm;
@@ -313,11 +306,15 @@ function updateTimer() {
   updateLiveStats(hiddenInput.value);
 }
 
-function formatTime(ms) {
-  const totalSec = Math.floor(ms / 1000);
+// withMs가 true면 0.001초 단위까지 표시 (예: 01:23.456)
+function formatTime(ms, withMs = false) {
+  const totalMs = Math.max(0, Math.floor(ms));
+  const totalSec = Math.floor(totalMs / 1000);
   const min = String(Math.floor(totalSec / 60)).padStart(2, '0');
   const sec = String(totalSec % 60).padStart(2, '0');
-  return `${min}:${sec}`;
+  if (!withMs) return `${min}:${sec}`;
+  const milli = String(totalMs % 1000).padStart(3, '0');
+  return `${min}:${sec}.${milli}`;
 }
 
 // ---------- 4) 종료 ----------
@@ -328,15 +325,12 @@ function finishGame() {
 
   const elapsedMs = startTime ? Date.now() - startTime : 0;
   const elapsedMin = elapsedMs / 60000;
-  const total = correctStrokes + wrongStrokes;
-  const acc = total > 0 ? Math.round((correctStrokes / total) * 100) : 100;
   const cpm = elapsedMin > 0 ? Math.round(correctStrokes / elapsedMin) : 0;
   const matchRate = calcMatchRate(targetText, hiddenInput.value);
 
   resultUserInfo.textContent = `${userName} ${userPosition}님의 기록`;
-  resultTime.textContent = formatTime(elapsedMs);
+  resultTime.textContent = formatTime(elapsedMs, true); // 0.001초 단위까지 표시
   resultCpm.textContent = cpm;
-  resultAcc.textContent = acc + '%';
   resultMatch.textContent = matchRate + '%';
   resultMistakes.textContent = wrongStrokes;
   saveStatus.textContent = '';
@@ -344,13 +338,11 @@ function finishGame() {
   hiddenInput.blur();
   showScreen('result');
 
-  // 추가: 스프레드시트로 기록 전송
   saveRecord({
     name: userName,
     position: userPosition,
-    elapsedSec: Math.round(elapsedMs / 1000),
+    elapsedSec: Math.round(elapsedMs) / 1000, // 예: 83.456 (초, 소수점 3자리)
     cpm: cpm,
-    accuracy: acc,
     matchRate: matchRate,
     mistakes: wrongStrokes,
     completed: hiddenInput.value.length >= targetText.length,
