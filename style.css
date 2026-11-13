@@ -111,6 +111,8 @@ h1 { text-align: center; font-size: 28px; margin-bottom: 12px; }
 .result-label { font-size: 13px; color: #888; margin-bottom: 6px; }
 .result-value { font-size: 28px; font-weight: 700; }
 
+#resultTime { font-size: 24px; white-space: nowrap; }
+
 @media (max-width: 480px) {
   .target-text { font-size: 20px; padding: 14px; height: 200px; }
   #screen-game { align-items: flex-start; padding-top: 16px; }
